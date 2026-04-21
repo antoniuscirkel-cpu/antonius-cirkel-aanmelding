@@ -152,7 +152,7 @@
         }
 
         .submit-btn:disabled {
-            opacity: 0.6;
+            opacity: 0.45;
             cursor: not-allowed;
         }
 
@@ -376,30 +376,35 @@
         });
         const email = document.getElementById('email').value.trim();
         if (!email || !isValidEmail(email)) { showError('email', true); valid = false; }
-
-        // AVG checkboxen valideren
-        ['avg_verwerking', 'avg_contact'].forEach(f => {
-            const checked = document.getElementById(f).checked;
-            const errEl = document.getElementById(f + '-error');
-            if (!checked) { errEl.classList.add('visible'); valid = false; }
-            else errEl.classList.remove('visible');
-        });
         else { showError('email', false); }
         return valid;
     }
 
+    // Tekstvelden: foutmelding verbergen bij typen
     ['voornaam', 'achternaam', 'email', 'telefoon'].forEach(f => {
         document.getElementById(f).addEventListener('input', () => showError(f, false));
     });
 
-    // AVG checkboxen: foutmelding verbergen zodra aangevinkt
+    // Knop uitschakelen zolang beide AVG-checkboxen niet aangevinkt zijn
+    function updateSubmitBtn() {
+        const beide = document.getElementById('avg_verwerking').checked &&
+                      document.getElementById('avg_contact').checked;
+        submitBtn.disabled = !beide;
+        submitBtn.style.opacity = beide ? '1' : '0.45';
+        submitBtn.style.cursor  = beide ? 'pointer' : 'not-allowed';
+    }
+
     ['avg_verwerking', 'avg_contact'].forEach(f => {
         document.getElementById(f).addEventListener('change', () => {
             if (document.getElementById(f).checked) {
                 document.getElementById(f + '-error').classList.remove('visible');
             }
+            updateSubmitBtn();
         });
     });
+
+    // Direct bij laden de knop op juiste staat zetten
+    updateSubmitBtn();
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
