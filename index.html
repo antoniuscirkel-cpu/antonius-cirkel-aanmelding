@@ -199,6 +199,59 @@
             display: none;
         }
 
+        /* AVG checkboxes */
+        .avg-group {
+            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .avg-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 14px;
+            background: var(--accent-pale);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+        }
+
+        .avg-item input[type="checkbox"] {
+            margin-top: 3px;
+            width: 17px;
+            height: 17px;
+            min-width: 17px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .avg-item label {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--text);
+            text-transform: none;
+            letter-spacing: 0;
+            line-height: 1.5;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+
+        .avg-item label strong {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .avg-error {
+            font-size: 0.72rem;
+            color: var(--error);
+            margin-top: 4px;
+            display: none;
+        }
+
+        .avg-error.visible { display: block; }
+
         .privacy-note {
             font-size: 0.7rem;
             color: var(--text-muted);
@@ -249,10 +302,31 @@
                 <div class="error-text" id="telefoon-error">Vul je telefoonnummer in</div>
             </div>
 
+            <!-- AVG toestemming -->
+            <div class="avg-group">
+                <div class="avg-item">
+                    <input type="checkbox" id="avg_verwerking" name="avg_verwerking">
+                    <label for="avg_verwerking">
+                        <strong>Toestemming gegevensverwerking</strong><br>
+                        Ik geef toestemming aan Antonius Cirkel (Parochie Christus de Priester) om mijn persoonsgegevens (naam, e-mail, telefoonnummer) te verwerken voor de coördinatie van vrijwilligerswerk. Mijn gegevens worden niet gedeeld met derden en worden verwijderd zodra mijn betrokkenheid eindigt.
+                    </label>
+                </div>
+                <div class="avg-error" id="avg_verwerking-error">Je moet toestemming geven voor de verwerking van je gegevens om je aan te melden.</div>
+
+                <div class="avg-item">
+                    <input type="checkbox" id="avg_contact" name="avg_contact">
+                    <label for="avg_contact">
+                        <strong>Toestemming voor contact</strong><br>
+                        Ik geef toestemming om via e-mail en/of telefoon benaderd te worden voor beschikbare vrijwilligerstaken en relevante informatie vanuit Antonius Cirkel.
+                    </label>
+                </div>
+                <div class="avg-error" id="avg_contact-error">Je moet toestemming geven voor contact om je aan te melden.</div>
+            </div>
+
             <button type="submit" class="submit-btn" id="submitBtn">Aanmelden</button>
 
             <p class="privacy-note">
-                Je gegevens worden alleen gebruikt om je toegang te geven tot de Antonius Cirkel app. We delen je gegevens niet met derden.
+                Je gegevens worden verwerkt op basis van jouw toestemming (AVG art. 6 lid 1a). Je kunt deze toestemming altijd intrekken via <a href="mailto:antonius.cirkel@gmail.com" style="color:var(--primary)">antonius.cirkel@gmail.com</a>.
             </p>
         </form>
     </div>
@@ -302,12 +376,29 @@
         });
         const email = document.getElementById('email').value.trim();
         if (!email || !isValidEmail(email)) { showError('email', true); valid = false; }
+
+        // AVG checkboxen valideren
+        ['avg_verwerking', 'avg_contact'].forEach(f => {
+            const checked = document.getElementById(f).checked;
+            const errEl = document.getElementById(f + '-error');
+            if (!checked) { errEl.classList.add('visible'); valid = false; }
+            else errEl.classList.remove('visible');
+        });
         else { showError('email', false); }
         return valid;
     }
 
     ['voornaam', 'achternaam', 'email', 'telefoon'].forEach(f => {
         document.getElementById(f).addEventListener('input', () => showError(f, false));
+    });
+
+    // AVG checkboxen: foutmelding verbergen zodra aangevinkt
+    ['avg_verwerking', 'avg_contact'].forEach(f => {
+        document.getElementById(f).addEventListener('change', () => {
+            if (document.getElementById(f).checked) {
+                document.getElementById(f + '-error').classList.remove('visible');
+            }
+        });
     });
 
     form.addEventListener('submit', async (e) => {
@@ -321,7 +412,9 @@
             voornaam: document.getElementById('voornaam').value.trim(),
             achternaam: document.getElementById('achternaam').value.trim(),
             email: document.getElementById('email').value.trim(),
-            telefoon: document.getElementById('telefoon').value.trim()
+            telefoon: document.getElementById('telefoon').value.trim(),
+            avg_verwerking: document.getElementById('avg_verwerking').checked,
+            avg_contact: document.getElementById('avg_contact').checked
         };
 
         try {
